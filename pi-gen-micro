@@ -94,7 +94,7 @@ dpkg_force_install() {
   apt_download "$1"
   set -o noglob
   # shellcheck disable=SC2086
-  dpkg ${DPKG_EXTRA_ARGS} --install "$(get_package_path $1)"
+  dpkg ${DPKG_EXTRA_ARGS} --install --force-overwrite "$(get_package_path $1)"
   set +o noglob
 }
 
