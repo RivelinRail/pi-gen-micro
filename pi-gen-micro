@@ -90,6 +90,14 @@ dpkg_install() {
   set +o noglob
 }
 
+dpkg_force_install() {
+  apt_download "$1"
+  set -o noglob
+  # shellcheck disable=SC2086
+  dpkg ${DPKG_EXTRA_ARGS} --install "$(get_package_path $1)"
+  set +o noglob
+}
+
 apt-get update
 mkdir -p build/var/lib/dpkg
 touch build/var/lib/dpkg/lock-frontend
@@ -128,7 +136,18 @@ Conflicts: ${base_package} (= ${PACKAGE_VERSION})" >> "${EXTRACT_DIR}/DEBIAN/con
   set +o noglob
 }
 
-dpkg_install libc6
+# Download, patch, install udeb substitute packages
+install_udeb_substitute libc6-udeb
+if [ -f "${CONFIGURATION_FOLDER}/udebs.list" ]; then
+    IFS=', ' read -r -a array <<< "$(< "${CONFIGURATION_FOLDER}"/udebs.list tr '\n' ', ')"
+
+    for package in "${array[@]}"
+    do
+      echo "Installing Udeb Substitute: ${package}"
+      install_udeb_substitute "${package}"
+    done
+fi
+
 dpkg_install busybox
 
 cd build/bin
@@ -168,7 +187,7 @@ rm -rf build/etc/init.d
 apt-get --fix-broken install
 
 # Tiny debconf for libpam0g (systemd dep)
-apt_install cdebconf cdebconf-text
+apt_install cdebconf-udeb cdebconf-text-udeb
 sed --in-place 's/newt/text/g' build/etc/cdebconf.conf
 if [ "${SSH}" = 1 ]
 then
@@ -176,9 +195,6 @@ then
   apt_install dropbear-bin
   apt_install dropbear-ssh-service
 fi
-
-# libc6-dev
-apt_install libc6-dev
 
 # TODO: postinst failure, fstrim settings using deb-systemd-helper
 apt_install util-linux
@@ -207,6 +223,8 @@ then
   apt-get --fix-broken install
 fi
 
+dpkg_force_install libc6
+
 IFS=', ' read -r -a array <<< "$(< "${CONFIGURATION_FOLDER}"/packages.list tr '\n' ', ')"
 
 for package in "${array[@]}"
@@ -222,7 +240,7 @@ then
   then
     echo "Installing & Enabling networking"
     cp "${PREBUILTS_DIR}"/20-wired.network build/etc/systemd/network/20-wired.network
-    if [ "${CHRONY}" = 1 ]
+    if ["${CHRONY}" = 1 ]
     then
       echo "Installing Chrony for Network Time Sync"
       apt_install chrony
