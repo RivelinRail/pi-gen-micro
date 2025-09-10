@@ -583,8 +583,3 @@ echo "Compressing & creating boot image"
 find . -print0 | cpio --null -ov --format=newc > ../initramfs.cpio 2>/dev/null
 cd ..
 zstd --no-progress --ultra --long --rm -22 initramfs.cpio -o "${OUT_DIR}"/rootfs.cpio.zst
-
-echo "Making boot img"
-echo "Out directory = ${OUT_DIR}"
-mkdir -p "${OUT_DIR}"
-rpi-make-boot-image -d "${OUT_DIR}"/ -o "${OUT_IMAGE_NAME}" -a "${KERNEL_BIT_SIZE}"
