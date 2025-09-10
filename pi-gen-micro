@@ -128,18 +128,6 @@ Conflicts: ${base_package} (= ${PACKAGE_VERSION})" >> "${EXTRACT_DIR}/DEBIAN/con
   set +o noglob
 }
 
-# Download, patch, install udeb substitute packages
-install_udeb_substitute libc6-udeb
-if [ -f "${CONFIGURATION_FOLDER}/udebs.list" ]; then
-    IFS=', ' read -r -a array <<< "$(< "${CONFIGURATION_FOLDER}"/udebs.list tr '\n' ', ')"
-
-    for package in "${array[@]}"
-    do
-      echo "Installing Udeb Substitute: ${package}"
-      install_udeb_substitute "${package}"
-    done
-fi
-
 dpkg_install busybox
 
 cd build/bin
@@ -179,7 +167,7 @@ rm -rf build/etc/init.d
 apt-get --fix-broken install
 
 # Tiny debconf for libpam0g (systemd dep)
-apt_install cdebconf-udeb cdebconf-text-udeb
+apt_install cdebconf cdebconf-text
 sed --in-place 's/newt/text/g' build/etc/cdebconf.conf
 if [ "${SSH}" = 1 ]
 then
@@ -187,6 +175,9 @@ then
   apt_install dropbear-bin
   apt_install dropbear-ssh-service
 fi
+
+# libc6-dev
+apt_install libc6-dev
 
 # TODO: postinst failure, fstrim settings using deb-systemd-helper
 apt_install util-linux
