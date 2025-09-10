@@ -128,6 +128,7 @@ Conflicts: ${base_package} (= ${PACKAGE_VERSION})" >> "${EXTRACT_DIR}/DEBIAN/con
   set +o noglob
 }
 
+dpkg_install libc6
 dpkg_install busybox
 
 cd build/bin
