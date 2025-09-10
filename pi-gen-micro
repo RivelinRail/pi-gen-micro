@@ -229,15 +229,27 @@ then
   if [ "${UDEV}" = 1 ]
   then
     echo "Installing & Enabling networking"
-    apt_install systemd-timesyncd
     cp "${PREBUILTS_DIR}"/20-wired.network build/etc/systemd/network/20-wired.network
-    mkdir -p build/var/lib/systemd/timesync/
-    ln -s /lib/systemd/system/systemd-timesyncd.service build/etc/systemd/system/dbus-org.freedesktop.timesync1.service
-    ln -s /lib/systemd/system/systemd-timesyncd.service build/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service
-    cp "${PREBUILTS_DIR}"/timesyncd.conf build/etc/systemd/timesyncd.conf
-    sed -i "s/After=systemd-sysusers.service/After=systemd-sysusers.service, network-online.target/" ./build/usr/lib/systemd/system/systemd-timesyncd.service
-    sed -i "s/Wants=time-set.target/Wants=network-online.target/" build/usr/lib/systemd/system/systemd-timesyncd.service
-    sed -i "s/Before=time-set.target sysinit.target shutdown.target//" build/usr/lib/systemd/system/systemd-timesyncd.service
+    if ["${CHRONY}" = 1 ]
+    then
+      echo "Installing Chrony for Network Time Sync"
+      apt_install chrony
+      mkdir -p build/etc/chrony/
+      cp "${PREBUILTS_DIR}"/chrony.conf build/etc/chrony/chrony.conf
+      systemctl enable chrony
+    else
+      echo "Installing systemd-timesyncd for Network Time Sync"
+
+      apt_install systemd-timesyncd
+      mkdir -p build/var/lib/systemd/timesync/
+      ln -s /lib/systemd/system/systemd-timesyncd.service build/etc/systemd/system/dbus-org.freedesktop.timesync1.service
+      ln -s /lib/systemd/system/systemd-timesyncd.service build/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service
+      cp "${PREBUILTS_DIR}"/timesyncd.conf build/etc/systemd/timesyncd.conf
+      sed -i "s/After=systemd-sysusers.service/After=systemd-sysusers.service, network-online.target/" ./build/usr/lib/systemd/system/systemd-timesyncd.service
+      sed -i "s/Wants=time-set.target/Wants=network-online.target/" build/usr/lib/systemd/system/systemd-timesyncd.service
+      sed -i "s/Before=time-set.target sysinit.target shutdown.target//" build/usr/lib/systemd/system/systemd-timesyncd.service
+
+    fi
 
     mkdir -p build/etc/systemd/system
     ln -s /lib/systemd/system/systemd-networkd.service build/etc/systemd/system/dbus-org.freedesktop.network1.service
