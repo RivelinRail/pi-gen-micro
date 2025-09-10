@@ -582,4 +582,4 @@ echo "Compressing & creating boot image"
 
 find . -print0 | cpio --null -ov --format=newc > ../initramfs.cpio 2>/dev/null
 cd ..
-zstd --no-progress --ultra --long --rm -22 initramfs.cpio -o "${OUT_DIR}"/rootfs.cpio.zst
+zstd --no-progress --ultra --long --rm -19 initramfs.cpio -o "${OUT_DIR}"/rootfs.cpio.zst
