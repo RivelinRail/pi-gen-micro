@@ -230,7 +230,7 @@ then
   then
     echo "Installing & Enabling networking"
     cp "${PREBUILTS_DIR}"/20-wired.network build/etc/systemd/network/20-wired.network
-    if ["${CHRONY}" = 1 ]
+    if [ "${CHRONY}" = 1 ]
     then
       echo "Installing Chrony for Network Time Sync"
       apt_install chrony
@@ -589,3 +589,5 @@ if [ -f "${CONFIGURATION_FOLDER}/generic_delete.list" ]; then
       rm -rf $(find . -name *${package}*)
     done
 fi
+
+echo "Filesystem generation finished"
