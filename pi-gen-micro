@@ -247,8 +247,8 @@ then
     echo "nameserver 8.8.8.8
 nameserver 8.8.4.4
 " > build/etc/resolv.conf
-    mkdir -p build/etc/ssl/certs/ 
-    
+    mkdir -p build/etc/ssl/certs/
+
     # ca-certificates are not installed into the correct directory by default
     # Importing the required certificates from the Host machine
     cp -r /etc/ssl/certs/* build/etc/ssl/certs/
@@ -434,7 +434,7 @@ if [ "$#" -eq 1 ]; then
 else
   IFS=',' read -ra target_devices <<< "$2"
   for arg in "${target_devices[@]}";
-  do 
+  do
     echo "Installing files for ${arg}"
     if [ "${arg}" == "cm5" ]; then
       # cm5 Files
@@ -506,7 +506,7 @@ else
       cp "${KPKG_EXTRACT}"/usr/lib/linux-image-"${KERNEL_VERSION_STR}"/broadcom/bcm2710-rpi-cm3.dtb "${OUT_DIR}"/
       cp "${KPKG_EXTRACT}"/usr/lib/linux-image-"${KERNEL_VERSION_STR}"/broadcom/bcm2837-rpi-cm3-io3.dtb "${OUT_DIR}"/
     fi
-    
+
     if [ "${arg}" == "02W" ]; then
       # 02W Files
       cp raspi-firmware/* "${OUT_DIR}"/
@@ -588,10 +588,3 @@ echo "Making boot img"
 echo "Out directory = ${OUT_DIR}"
 mkdir -p "${OUT_DIR}"
 rpi-make-boot-image -d "${OUT_DIR}"/ -o "${OUT_IMAGE_NAME}" -a "${KERNEL_BIT_SIZE}"
-
-echo "Making 2710 bootfiles"
-mkdir 2710
-mount --bind "${OUT_DIR}" 2710
-tar --create --file "${OUT_2710_NAME}" 2710
-umount 2710
-rmdir 2710
