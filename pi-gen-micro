@@ -577,9 +577,3 @@ if [ -f "${CONFIGURATION_FOLDER}/generic_delete.list" ]; then
       rm -rf $(find . -name *${package}*)
     done
 fi
-
-echo "Compressing & creating boot image"
-
-find . -print0 | cpio --null -ov --format=newc > ../initramfs.cpio 2>/dev/null
-cd ..
-zstd --no-progress --ultra --long --rm -19 initramfs.cpio -o "${OUT_DIR}"/rootfs.cpio.zst
